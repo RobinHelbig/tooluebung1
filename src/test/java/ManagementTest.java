@@ -59,17 +59,18 @@ public class ManagementTest {
     public void testStartairportNotInGraph() throws Throwable {
         System.out.println("testStartairportNotInGraph()");
         Flughafen flughafenG = new Flughafen("G");
+        flughafenG.fuegeZielhinzu(flughafenA, 10);
         graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenG);
-        // Distanz zu allen Flughafen ist 2147483647
+        assertEquals(33, flughafenF.getDistanz());
+        // Die Distanzen und Routen in den Flughäfen werden richtig berechnet. Der Startflughafen ist nicht im Graph
     }
 
     //Startflughafen ist null
     @Test
     public void testStartairportIsNull() throws Throwable {
         System.out.println("testStartairportIsNull()");
-        Flughafen flughafenA = null;
-        graph.fuegeFlughafenhinzu(flughafenA);
-        graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenA);
+        graph =  management.berechnekuerzestenWegvomStartflughafen(graph, null);
+        assertEquals(23, flughafenF.getDistanz());
         // Error: Null Exception Pointer
     }
 
@@ -79,6 +80,7 @@ public class ManagementTest {
         System.out.println("testNegativeDistance()");
         flughafenB.fuegeZielhinzu(flughafenD, -5);
         graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenA);
+        assertEquals(6, flughafenF.getDistanz());
         // Es wird mit den ngativen Werten /gerechner/addiert
     }
 
@@ -89,6 +91,7 @@ public class ManagementTest {
         flughafenD = null;
         graph.fuegeFlughafenhinzu(flughafenD);
         graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenA);
+        assertEquals(23, flughafenF.getDistanz());
         // keine AUswirkung für die Methode aber beim Graph print => Print Error: Null Exception Pointer
     }
 
@@ -99,7 +102,8 @@ public class ManagementTest {
         Flughafen flughafenG = new Flughafen("G");
         flughafenC.fuegeZielhinzu(flughafenG, 10);
         graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenA);
-        //Distanz zu dem nicht hinzugefügeten Flughafen wird nicht berechnet
+        assertEquals(Integer.MAX_VALUE, flughafenF.getDistanz());
+        //Die Distanzen und Routen in den Flughäfen werden richtig berechnet. Im Graphen sind die dann natürlich trotzdem nicht drin.
     }
 
     //Es gibt Schlingen (also Kanten bei denen Start- und Endknoten übereinstimmen)
@@ -107,6 +111,8 @@ public class ManagementTest {
     public void testEdgesSameStartnodeAndEndNode() throws Throwable {
         System.out.println("testEdgesSameStartnodeAndEndNode()");
         flughafenB.fuegeZielhinzu(flughafenA, 10);
+        graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenA);
+        assertEquals(23, flughafenF.getDistanz());
         //Wird ignoriert da immer der Kürzeste Pfad verwendet wird? A => A und nicht A => B => A
     }
 
@@ -114,10 +120,9 @@ public class ManagementTest {
     @Test
     public void testparrallelEdges() throws Throwable {
         System.out.println("testparrallelEdges()");
-        Flughafen flughafenG = new Flughafen("G");
-        flughafenC.fuegeZielhinzu(flughafenG, 10);
-        flughafenB.fuegeZielhinzu(flughafenG, 2);
-        graph.fuegeFlughafenhinzu(flughafenG);
+        flughafenB.fuegeZielhinzu(flughafenD, 10);
+        graph =  management.berechnekuerzestenWegvomStartflughafen(graph, flughafenA);
+        assertEquals(21, flughafenF.getDistanz());
         // Nimmt den kürzeren Weg
     }
 
@@ -127,6 +132,7 @@ public class ManagementTest {
         System.out.println("testNotReachableAirports()");
         Flughafen flughafenG = new Flughafen("G");
         graph.fuegeFlughafenhinzu(flughafenG);
+        assertEquals(Integer.MAX_VALUE, flughafenG.getDistanz());
         // Distanz zu nicht erreichbarem Flughafen ist 2147483647
 
     }
